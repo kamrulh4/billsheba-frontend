@@ -1,0 +1,40 @@
+import { Tx } from "@/components/tx"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import {
+  resetOrganizationsStore,
+  useOrganizationsStore,
+} from "@/stores/organizations-store"
+import { ViewOrganizationsContent } from "./view-organizations-content"
+
+export function ViewOrganizationsDialog() {
+  const { isViewOrganizationDialogOpen, setIsViewOrganizationDialogOpen } =
+    useOrganizationsStore()
+
+  return (
+    <Dialog
+      open={isViewOrganizationDialogOpen}
+      onOpenChange={() => {
+        resetOrganizationsStore("selectedOrganization")
+        setIsViewOrganizationDialogOpen(false)
+      }}
+    >
+      <DialogContent className="max-h-[90vh] max-w-[100vw] rounded-none md:rounded-lg lg:!max-w-[70vw] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>
+            <Tx>Organization Details</Tx>
+          </DialogTitle>
+          <DialogDescription>
+            <Tx>View detailed information about the organization.</Tx>
+          </DialogDescription>
+        </DialogHeader>
+        <ViewOrganizationsContent />
+      </DialogContent>
+    </Dialog>
+  )
+}

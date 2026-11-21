@@ -1,0 +1,32 @@
+echo '🔧 Running pre-commit checks...'
+
+# husky puts node_modules/.bin on PATH, so the local binaries are called
+# directly. That keeps the hook working whichever package manager is in use
+# instead of hard-coding one that may not be installed.
+if [ ! -x node_modules/.bin/biome ]; then
+  echo '❌ Dependencies are not installed. Run `pnpm install` first.'
+  exit 1
+fi
+
+echo '📝 Checking Biome formatting and lint rules...'
+biome check --staged --no-errors-on-unmatched || {
+  echo '❌ Biome check failed. Run `pnpm lint` to fix, then stage the changes.'
+  exit 1
+}
+echo '✅ Biome check passed.'
+
+echo '🛠️ Checking TypeScript types...'
+tsc --noEmit || {
+  echo '❌ TypeScript type check failed. Review errors to fix type issues.'
+  exit 1
+}
+echo '✅ TypeScript type check passed.'
+
+echo '🏗️ Building project...'
+next build || {
+  echo '❌ Build failed. Review errors to resolve build issues.'
+  exit 1
+}
+echo '✅ Build passed.'
+
+echo '✅ All checks passed. Proceeding with commit.'
