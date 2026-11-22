@@ -98,6 +98,9 @@ const bn: Record<string, string> = {
   "Discount (optional)": "ছাড় (ঐচ্ছিক)",
   Discount: "ছাড়",
   "Discount given": "দেওয়া ছাড়",
+  "Monthly SMS limit (custom)": "মাসিক এসএমএস সীমা (কাস্টম)",
+  "Deposit recorded": "জমা নথিভুক্ত হয়েছে",
+  "Deposit removed": "জমা মুছে ফেলা হয়েছে",
   "The bill is paid once amount + discount covers it. Write the reason in Notes.":
     "টাকা + ছাড় বিলের সমান হলে বিল পরিশোধ হবে। নোটে কারণ লিখুন।",
   "Pay your internet bill": "আপনার ইন্টারনেট বিল পরিশোধ করুন",

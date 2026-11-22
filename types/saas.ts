@@ -273,3 +273,32 @@ export type RouterProfile = {
   builtin: boolean
   package: { uid: string; name: string } | null
 }
+
+export type CollectionRow = {
+  collector_id: number
+  name: string
+  payments: number
+  collected: string
+  deposited: string
+  pending: string
+}
+
+export type CollectionSummary = {
+  start_date: string
+  end_date: string
+  rows: CollectionRow[]
+  total_collected: string
+  total_deposited: string
+  total_pending: string
+}
+
+export type Deposit = {
+  id: number
+  uid: string
+  collector_id: number
+  collector_name: string | null
+  amount: string
+  deposit_date: string
+  note: string
+  received_by_name: string | null
+}

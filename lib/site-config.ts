@@ -44,10 +44,10 @@ export const siteConfig = {
 
 export const contactInfo = {
   // Primary support / sales line.
-  phone: "01812528183",
-  phoneIntl: "+8801812528183",
+  phone: "01631183528",
+  phoneIntl: "+8801631183528",
   // wa.me expects the number without "+" or leading zero.
-  whatsapp: "8801812528183",
+  whatsapp: "8801631183528",
   // TODO: replace with the real inbox once it is provisioned.
   email: "support@billsheba.com",
   address: {

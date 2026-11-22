@@ -20,6 +20,7 @@ export type Organization = {
   billing_cycle: "MONTHLY" | "YEARLY" | "DAYS_30" | "DAYS_60" | "DAYS_90"
   logo: string
   allowed_customer: number
+  sms_quota_override?: number
   total_customer: number
   router_ip?: string
   router_username?: string
@@ -40,6 +41,7 @@ export type CreateOrganization = {
   subscription?: number | null
   subscription_status?: "TRIAL" | "ACTIVE" | "EXPIRED" | "CANCELLED" | "PENDING"
   allowed_customer?: number
+  sms_quota_override?: number
   total_customer?: number
   router_ip?: string
   router_username?: string

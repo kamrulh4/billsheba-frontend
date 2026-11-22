@@ -14,6 +14,7 @@ export const PROTECTED_PREFIXES = [
   "/sessions",
   "/profile",
   "/expenses",
+  "/collections",
   "/complaints",
   "/reports",
   "/payment-requests",

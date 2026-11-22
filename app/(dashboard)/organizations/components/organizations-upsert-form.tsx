@@ -47,6 +47,7 @@ export const formSchema = z.object({
     .enum(["TRIAL", "ACTIVE", "EXPIRED", "CANCELLED", "PENDING"])
     .optional(),
   allowed_customer: z.number().min(0).optional(),
+  sms_quota_override: z.number().min(0).optional(),
   total_customer: z.number().min(0).optional(),
   router_ip: z.string().max(64).optional(),
   router_username: z.string().max(150).optional(),
@@ -78,6 +79,7 @@ export function OrganizationsUpsertForm() {
       subscription: selectedOrganization.subscription?.toString() || "",
       subscription_status: selectedOrganization.subscription_status || "PENDING",
       allowed_customer: selectedOrganization.allowed_customer || 0,
+      sms_quota_override: selectedOrganization.sms_quota_override || 0,
       total_customer: selectedOrganization.total_customer || 0,
       router_ip: selectedOrganization.router_ip || "",
       router_username: selectedOrganization.router_username || "",
@@ -290,6 +292,28 @@ export function OrganizationsUpsertForm() {
                       <Input
                         type="number"
                         placeholder="Enter allowed customers"
+                        {...field}
+                        onChange={(e) => field.onChange(+e.target.value)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="sms_quota_override"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      <Tx>Monthly SMS limit (custom)</Tx>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min={0}
+                        placeholder="0 = use the plan's limit"
                         {...field}
                         onChange={(e) => field.onChange(+e.target.value)}
                       />

@@ -79,7 +79,7 @@ export function PricingContent({ locale }: { locale: Locale }) {
                   variant={plan.highlight ? "default" : "outline"}
                 >
                   <Link href="/register">
-                    {plan.price === 0
+                    {plan.name === "Basic"
                       ? tr(locale, "pricing.startTrial")
                       : tr(locale, "pricing.getStarted")}
                   </Link>

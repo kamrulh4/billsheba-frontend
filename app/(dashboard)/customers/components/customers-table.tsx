@@ -9,7 +9,7 @@ import { usePresence } from "@/hooks/rq/use-sessions-query"
 import { generateAvatarUrl } from "@/lib/utils"
 import { useCustomersStore } from "@/stores/customers-store"
 import type { Customer } from "@/types/customers"
-import { columns } from "./columns"
+import { columns as allColumns } from "./columns"
 import { CustomersTableRowActions } from "./customers-table-row-actions"
 import { CustomersTableToolbar } from "./customers-table-toolbar"
 import { UpsertCustomersDialog } from "./upsert-customers-dialog"
@@ -39,6 +39,21 @@ export function CustomersTable() {
     }))
   }, [customersData?.results, presence?.online])
 
+  // The expiry date only means something when each customer has their own paid period (30/60/90-day
+  // cycles). With a calendar-month cycle the server ignores it, so the column would be a column of dashes.
+  const dayBased =
+    !!organization?.billing_cycle && organization.billing_cycle !== "MONTHLY"
+  const columns = useMemo(
+    () =>
+      dayBased
+        ? allColumns
+        : allColumns.filter(
+            (c) =>
+              (c as { accessorKey?: string }).accessorKey !== "subscription_end_date",
+          ),
+    [dayBased],
+  )
+
   const { table, render } = useDataTable({
     columns,
     data: rows!,
@@ -61,6 +76,7 @@ export function CustomersTable() {
               description: customer.username,
               avatar: generateAvatarUrl(customer.username || customer.name),
               uid: customer.uid,
+              dot: presenceDot(customer.presence),
             }
           }}
           renderRowActions={(row) => <CustomersTableRowActions row={row} />}
@@ -80,4 +96,10 @@ export function CustomersTable() {
       <ViewCustomersDialog />
     </div>
   )
+}
+
+function presenceDot(state?: string) {
+  if (state === "online") return { className: "bg-emerald-500", label: "Online" }
+  if (state === "offline") return { className: "bg-red-500", label: "Offline" }
+  return undefined // router not connected / unknown: no dot
 }

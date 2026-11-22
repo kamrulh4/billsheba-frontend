@@ -20,6 +20,8 @@ export type CardItem = {
   title: string
   description?: string
   avatar?: string
+  /** Small status dot on the avatar (e.g. online/offline). */
+  dot?: { className: string; label: string }
 }
 
 type ItemWithRow<TData> = {
@@ -86,10 +88,20 @@ export function DataTableCardView<TData>({
           >
             {item.avatar ? (
               <ItemMedia>
-                <Avatar className="rounded-md">
-                  <AvatarImage src={item.avatar} />
-                  <AvatarFallback>{item.title.charAt(0)}</AvatarFallback>
-                </Avatar>
+                <div className="relative">
+                  <Avatar className="rounded-md">
+                    <AvatarImage src={item.avatar} />
+                    <AvatarFallback>{item.title.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  {item.dot && (
+                    <span
+                      role="img"
+                      aria-label={item.dot.label}
+                      title={item.dot.label}
+                      className={`absolute -right-1 -bottom-1 size-3 rounded-full ring-2 ring-background ${item.dot.className}`}
+                    />
+                  )}
+                </div>
               </ItemMedia>
             ) : null}
 

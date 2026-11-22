@@ -10,7 +10,9 @@ import { httpV1 } from "@/lib/xior"
 import type {
   AuditEntry,
   BillingInfo,
+  CollectionSummary,
   Complaint,
+  Deposit,
   Expense,
   Lead,
   OrganizationSettings,
@@ -76,6 +78,42 @@ export const useExpenses = (params?: Record<string, unknown>) =>
   })
 export const useExpenseMutations = () =>
   useCrud<Expense>("expenses", "/expenses", "Expense")
+
+// ---- collections & deposits (cash a collector still holds) ----------------------------------
+export const useCollectionSummary = (params: { start_date: string; end_date: string }) =>
+  useQuery({
+    queryKey: ["collections", "summary", params],
+    queryFn: () =>
+      httpV1
+        .get<CollectionSummary>("/collections/summary", { params })
+        .then((r) => r.data),
+  })
+export const useDeposits = (params: { start_date: string; end_date: string }) =>
+  useQuery({
+    queryKey: ["collections", "deposits", params],
+    queryFn: () => list<Deposit>("/collections/deposits", params),
+  })
+export function useDepositMutations() {
+  const qc = useQueryClient()
+  const refresh = () => qc.invalidateQueries({ queryKey: ["collections"] })
+  return {
+    create: useMutation({
+      mutationFn: (data: Record<string, unknown>) =>
+        httpV1.post<Deposit>("/collections/deposits", data).then((r) => r.data),
+      onSuccess: () => {
+        toast.success("Deposit recorded")
+        refresh()
+      },
+    }),
+    remove: useMutation({
+      mutationFn: (uid: string) => httpV1.delete(`/collections/deposits/${uid}`),
+      onSuccess: () => {
+        toast.success("Deposit removed")
+        refresh()
+      },
+    }),
+  }
+}
 
 // ---- complaints ----------------------------------------------------------------
 export const useComplaints = (params?: Record<string, unknown>) =>
