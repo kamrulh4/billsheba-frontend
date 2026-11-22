@@ -345,7 +345,11 @@ export const useRouterImportPreview = (enabled: boolean) =>
 export function useRouterImport() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (data: { prices: Record<string, string>; include_disabled: boolean }) =>
+    mutationFn: (data: {
+      prices: Record<string, string>
+      include_disabled: boolean
+      profiles: string[]
+    }) =>
       httpV1
         .post<RouterImportResult>("/organizations/me/router-import", data)
         .then((r) => r.data),

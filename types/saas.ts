@@ -251,6 +251,7 @@ export type RouterImportPreview = {
     rate_limit: string
     speed_mbps: number
     new_customers: number
+    disabled_customers: number
     package_exists: boolean
     builtin: boolean
   }[]

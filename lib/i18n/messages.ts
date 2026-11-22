@@ -391,6 +391,10 @@ const en = {
   "routerImport.nothing":
     "Nothing new to import — every router user is already in Billsheba.",
   "routerImport.go": "Import {n} customers",
+  "routerImport.pickHint":
+    "Tick only the profiles that belong to you. Users on unticked profiles are not imported.",
+  "routerImport.selectAll": "Select all",
+  "routerImport.clearAll": "Clear",
   "routerImport.done": "Imported {c} customers and {p} new packages",
   "routerImport.nextStep":
     "Next: check each customer's phone number, then generate bills.",
@@ -833,6 +837,10 @@ const bn: Record<MessageKey, string> = {
     "আপনার প্ল্যানে আরও {n} জন গ্রাহকের জায়গা আছে; বাকিরা বাদ যাবে। সবাইকে আনতে প্ল্যান আপগ্রেড করুন।",
   "routerImport.nothing": "নতুন কিছু নেই — রাউটারের সব ইউজার আগে থেকেই বিলশেবায় আছে।",
   "routerImport.go": "{n} জন গ্রাহক ইমপোর্ট করুন",
+  "routerImport.pickHint":
+    "শুধু আপনার নিজের প্রোফাইলগুলো টিক দিন। টিক না দেওয়া প্রোফাইলের ইউজার ইমপোর্ট হবে না।",
+  "routerImport.selectAll": "সব সিলেক্ট",
+  "routerImport.clearAll": "মুছুন",
   "routerImport.done": "{c} জন গ্রাহক ও {p} টি নতুন প্যাকেজ ইমপোর্ট হয়েছে",
   "routerImport.nextStep": "এরপর: প্রতিটি গ্রাহকের ফোন নম্বর দেখে নিন, তারপর বিল তৈরি করুন।",
   "routerImport.close": "বন্ধ করুন",
