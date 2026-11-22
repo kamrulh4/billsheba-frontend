@@ -8,7 +8,6 @@ import {
   Inbox,
   LayoutDashboard,
   type LucideIcon,
-  MessageSquare,
   MessageSquareWarning,
   Package2,
   Receipt,
@@ -48,7 +47,6 @@ export const navItems: NavItem[] = [
   { key: "nav.sessions", url: "/sessions", icon: Wifi, roles: MANAGERS },
   { key: "nav.expenses", url: "/expenses", icon: Receipt, roles: MANAGERS },
   { key: "nav.reports", url: "/reports", icon: BarChart3, roles: MANAGERS },
-  { key: "nav.sms", url: "/sms", icon: MessageSquare, roles: MANAGERS },
   { key: "nav.audit", url: "/audit", icon: History, roles: MANAGERS },
   { key: "nav.users", url: "/users", icon: User, roles: MANAGERS },
   {
