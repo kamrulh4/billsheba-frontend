@@ -22,6 +22,10 @@ export type CardItem = {
   avatar?: string
   /** Small status dot on the avatar (e.g. online/offline). */
   dot?: { className: string; label: string }
+  /** Extra line under the description (badges, chips). */
+  meta?: React.ReactNode
+  /** Right-aligned block before the actions (amount, status). */
+  trailing?: React.ReactNode
 }
 
 type ItemWithRow<TData> = {
@@ -105,12 +109,12 @@ export function DataTableCardView<TData>({
               </ItemMedia>
             ) : null}
 
-            <ItemContent className="gap-1">
-              <ItemTitle>{item.title}</ItemTitle>
-              <ItemDescription className="w-40 truncate">
-                {item.description}
-              </ItemDescription>
+            <ItemContent className="min-w-0 gap-1">
+              <ItemTitle className="max-w-full truncate">{item.title}</ItemTitle>
+              <ItemDescription className="truncate">{item.description}</ItemDescription>
+              {item.meta && <div className="flex flex-wrap items-center gap-1.5">{item.meta}</div>}
             </ItemContent>
+            {item.trailing && <div className="shrink-0 text-right">{item.trailing}</div>}
             <ItemActions onClick={(e) => e.stopPropagation()}>
               {row && renderRowActions ? (
                 renderRowActions(row)

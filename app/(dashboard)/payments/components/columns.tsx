@@ -11,12 +11,17 @@ import { Payment } from "@/types/payments"
 import { paymentMethods } from "../data/data"
 import { PaymentsTableRowActions } from "./payments-table-row-actions"
 
+const money = (n: number) => `৳${n.toLocaleString("en-US")}`
+const sumOf = (rows: { original: Payment }[], key: "amount" | "bill_amount") =>
+  rows.reduce((t, r) => t + (Number(r.original[key]) || 0), 0)
+
 export const columns: ColumnDef<Payment>[] = [
   {
     accessorKey: "customer",
     accessorFn: (row) =>
       `${row.customer.username} ${row.customer.name} ${row.customer.phone}`,
     header: ({ column }) => <DataTableColumnHeader column={column} title="Customer" />,
+    footer: () => <Tx>Total</Tx>,
     cell: ({ row }) => {
       return (
         <div className="flex space-x-2 items-center">
@@ -49,6 +54,13 @@ export const columns: ColumnDef<Payment>[] = [
 
       return `${name} ${phone}`
     },
+    // text box = substring search, the "Collected By" dropdown = exact list of collectors
+    filterFn: (row, id, value) => {
+      const text = String(row.getValue(id))
+      return Array.isArray(value)
+        ? value.includes(text)
+        : text.toLowerCase().includes(String(value).toLowerCase())
+    },
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Collected By" />
     ),
@@ -80,6 +92,7 @@ export const columns: ColumnDef<Payment>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Bill Amount (BDT)" />
     ),
+    footer: ({ table }) => money(sumOf(table.getFilteredRowModel().rows, "bill_amount")),
     cell: ({ row }) => {
       return (
         <div>
@@ -126,6 +139,11 @@ export const columns: ColumnDef<Payment>[] = [
     // accessorFn: (row) => `${row.entry_by?.first_name} ${row.entry_by?.last_name}`,
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Amount (BDT)" />
+    ),
+    footer: ({ table }) => (
+      <span className="text-emerald-600 dark:text-emerald-400">
+        {money(sumOf(table.getFilteredRowModel().rows, "amount"))}
+      </span>
     ),
     cell: ({ row }) => {
       return (

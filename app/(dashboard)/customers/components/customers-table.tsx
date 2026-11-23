@@ -6,6 +6,7 @@ import { useDataTable } from "@/components/data-table/use-data-table"
 import { useGetCustomerList } from "@/hooks/rq/use-customers-query"
 import { useMyOrganization } from "@/hooks/rq/use-saas-query"
 import { usePresence } from "@/hooks/rq/use-sessions-query"
+import { Badge } from "@/components/ui/badge"
 import { generateAvatarUrl } from "@/lib/utils"
 import { useCustomersStore } from "@/stores/customers-store"
 import type { Customer } from "@/types/customers"
@@ -73,10 +74,36 @@ export function CustomersTable() {
             const customer = row.original
             return {
               title: customer.name,
-              description: customer.username,
+              description: [customer.username, customer.phone].filter(Boolean).join(" · "),
+              meta: (
+                <>
+                  {customer.package?.name && (
+                    <Badge variant="secondary" className="font-normal">
+                      {customer.package.name}
+                    </Badge>
+                  )}
+                  <Badge
+                    variant="outline"
+                    className={
+                      customer.is_free
+                        ? "border-sky-500/40 text-sky-600 dark:text-sky-400"
+                        : customer.is_active
+                          ? "border-emerald-500/40 text-emerald-600 dark:text-emerald-400"
+                          : "border-red-500/40 text-red-600 dark:text-red-400"
+                    }
+                  >
+                    {customer.is_free ? "Free" : customer.is_active ? "Active" : "Inactive"}
+                  </Badge>
+                  {dayBased && customer.subscription_end_date && (
+                    <span className="text-xs text-muted-foreground">
+                      → {customer.subscription_end_date}
+                    </span>
+                  )}
+                </>
+              ),
               avatar: generateAvatarUrl(customer.username || customer.name),
               uid: customer.uid,
-              dot: presenceDot(customer.presence),
+              dot: presenceDot(customer.presence, !!organization?.router_configured),
             }
           }}
           renderRowActions={(row) => <CustomersTableRowActions row={row} />}
@@ -98,8 +125,9 @@ export function CustomersTable() {
   )
 }
 
-function presenceDot(state?: string) {
+function presenceDot(state?: string, routerOn = false) {
   if (state === "online") return { className: "bg-emerald-500", label: "Online" }
   if (state === "offline") return { className: "bg-red-500", label: "Offline" }
-  return undefined // router not connected / unknown: no dot
+  // router connected but this customer cannot be judged (not PPPoE / router unreadable): grey dot
+  return routerOn ? { className: "bg-slate-400", label: "Unknown" } : undefined
 }

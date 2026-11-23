@@ -1,7 +1,7 @@
 "use client"
 
 import { Table } from "@tanstack/react-table"
-import { Plus, X } from "lucide-react"
+import { Download, Plus, X } from "lucide-react"
 import * as React from "react"
 import { DataTableFacetedFilter } from "@/components/data-table/data-table-faceted-filter"
 import { DataTableSearch } from "@/components/data-table/data-table-search"
@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/select"
 import { usePaymentsStore } from "@/stores/payments-store"
 import { months, paymentMethods, paymentStatuses } from "../data/data"
+import { downloadPaymentsCsv } from "../data/export-csv"
+import type { Payment } from "@/types/payments"
 import { PaymentsYearSelect } from "./payments-year-select"
 
 interface DataTableToolbarProps<TData> {
@@ -29,6 +31,17 @@ export function PaymentsTableToolbar<TData>({ table }: DataTableToolbarProps<TDa
   const { setPaymentMutationType, setIsUpsertPaymentDialogOpen, paymentFilters } =
     usePaymentsStore()
   const [searchField, setSearchField] = React.useState("customer")
+
+  const collectors = React.useMemo(() => {
+    const seen = new Map<string, string>()
+    for (const row of table.getCoreRowModel().rows) {
+      const key = String(row.getValue("entry_by"))
+      const by = (row.original as Payment).entry_by
+      const name = by ? `${by.first_name || ""} ${by.last_name || ""}`.trim() : ""
+      seen.set(key, name || "None")
+    }
+    return [...seen].map(([value, label]) => ({ value, label }))
+  }, [table.getCoreRowModel().rows])
 
   const currentMonth = months[new Date().getMonth()].value
   const currentMonthArray = React.useMemo(() => [currentMonth], [currentMonth])
@@ -67,6 +80,14 @@ export function PaymentsTableToolbar<TData>({ table }: DataTableToolbarProps<TDa
           />
         )}
 
+        {table.getColumn("entry_by") && collectors.length > 0 && (
+          <DataTableFacetedFilter
+            column={table.getColumn("entry_by")}
+            title="Collected By"
+            options={collectors}
+          />
+        )}
+
         {table.getColumn("billing_month") && (
           <DataTableFacetedFilter
             column={table.getColumn("billing_month")}
@@ -89,6 +110,19 @@ export function PaymentsTableToolbar<TData>({ table }: DataTableToolbarProps<TDa
           </Button>
         )}
       </div>
+
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() =>
+          downloadPaymentsCsv(
+            table.getFilteredRowModel().rows.map((r) => r.original as Payment),
+          )
+        }
+      >
+        <Download />
+        <Tx>Export CSV</Tx>
+      </Button>
 
       <Button
         onClick={() => {

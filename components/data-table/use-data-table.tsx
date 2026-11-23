@@ -20,6 +20,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -33,6 +34,8 @@ interface DataTableProps<TData, TValue> {
   data: TData[]
   loading?: boolean
   pagination?: boolean
+  /** Render a footer row from each column's `footer` (totals of the filtered rows). */
+  showFooter?: boolean
 }
 
 const emptyArray = [] as any[]
@@ -42,6 +45,7 @@ export function useDataTable<TData, TValue>({
   data,
   loading,
   pagination = true,
+  showFooter = false,
 }: DataTableProps<TData, TValue>) {
   const { p } = useT()
   const [rowSelection, setRowSelection] = React.useState({})
@@ -129,6 +133,21 @@ export function useDataTable<TData, TValue>({
                 </TableRow>
               )}
             </TableBody>
+            {showFooter && table.getRowModel().rows.length > 0 && (
+              <TableFooter>
+                {table.getFooterGroups().map((group) => (
+                  <TableRow key={group.id}>
+                    {group.headers.map((header) => (
+                      <TableCell key={header.id} colSpan={header.colSpan} className="font-semibold">
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(header.column.columnDef.footer, header.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableFooter>
+            )}
           </Table>
         </div>
 
