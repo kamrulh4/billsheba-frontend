@@ -3,10 +3,10 @@
 import { useMemo } from "react"
 import { DataTableCardView } from "@/components/data-table/data-table-card-view"
 import { useDataTable } from "@/components/data-table/use-data-table"
+import { Badge } from "@/components/ui/badge"
 import { useGetCustomerList } from "@/hooks/rq/use-customers-query"
 import { useMyOrganization } from "@/hooks/rq/use-saas-query"
 import { usePresence } from "@/hooks/rq/use-sessions-query"
-import { Badge } from "@/components/ui/badge"
 import { generateAvatarUrl } from "@/lib/utils"
 import { useCustomersStore } from "@/stores/customers-store"
 import type { Customer } from "@/types/customers"
@@ -74,7 +74,9 @@ export function CustomersTable() {
             const customer = row.original
             return {
               title: customer.name,
-              description: [customer.username, customer.phone].filter(Boolean).join(" · "),
+              description: [customer.username, customer.phone]
+                .filter(Boolean)
+                .join(" · "),
               meta: (
                 <>
                   {customer.package?.name && (
@@ -92,7 +94,11 @@ export function CustomersTable() {
                           : "border-red-500/40 text-red-600 dark:text-red-400"
                     }
                   >
-                    {customer.is_free ? "Free" : customer.is_active ? "Active" : "Inactive"}
+                    {customer.is_free
+                      ? "Free"
+                      : customer.is_active
+                        ? "Active"
+                        : "Inactive"}
                   </Badge>
                   {dayBased && customer.subscription_end_date && (
                     <span className="text-xs text-muted-foreground">

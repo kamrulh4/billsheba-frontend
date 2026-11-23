@@ -3,9 +3,8 @@
 import { Suspense } from "react"
 import { DataTableCardView } from "@/components/data-table/data-table-card-view"
 import { useDataTable } from "@/components/data-table/use-data-table"
-import { useGetPaymentList } from "@/hooks/rq/use-payment-query"
 import { Badge } from "@/components/ui/badge"
-import { Tx } from "@/components/tx"
+import { useGetPaymentList } from "@/hooks/rq/use-payment-query"
 import { cn, generateAvatarUrl } from "@/lib/utils"
 import { usePaymentsStore } from "@/stores/payments-store"
 import { columns } from "./columns"
@@ -25,24 +24,9 @@ export function PaymentsTable() {
     showFooter: true,
   })
 
-  // numbers for the cards follow whatever filters are applied
-  const shown = table.getFilteredRowModel().rows.map((r) => r.original)
-  const collected = shown.reduce((t, p) => t + (Number(p.amount) || 0), 0)
-  const discount = shown.reduce((t, p) => t + (Number(p.discount) || 0), 0)
-  const cash = shown
-    .filter((p) => p.payment_method === "CASH")
-    .reduce((t, p) => t + (Number(p.amount) || 0), 0)
-
   return (
     <div className="space-y-4">
       <Suspense>
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <SummaryCard label="Total collected" value={`৳${collected.toLocaleString("en-US")}`} tone="emerald" />
-          <SummaryCard label="Payments" value={String(shown.length)} />
-          <SummaryCard label="Cash in hand" value={`৳${cash.toLocaleString("en-US")}`} tone="amber" />
-          <SummaryCard label="Discount given" value={`৳${discount.toLocaleString("en-US")}`} />
-        </div>
-
         <PaymentsTableToolbar table={table} />
 
         <div className="block md:hidden">
@@ -113,33 +97,6 @@ export function PaymentsTable() {
         <PaymentsUpsertDialog />
         <ViewPaymentsDialog />
       </Suspense>
-    </div>
-  )
-}
-
-function SummaryCard({
-  label,
-  value,
-  tone,
-}: {
-  label: string
-  value: string
-  tone?: "emerald" | "amber"
-}) {
-  return (
-    <div className="rounded-xl border bg-card p-4 shadow-xs">
-      <div className="text-xs text-muted-foreground">
-        <Tx>{label}</Tx>
-      </div>
-      <div
-        className={cn(
-          "mt-1 text-xl font-semibold tabular-nums md:text-2xl",
-          tone === "emerald" && "text-emerald-600 dark:text-emerald-400",
-          tone === "amber" && "text-amber-600 dark:text-amber-400",
-        )}
-      >
-        {value}
-      </div>
     </div>
   )
 }

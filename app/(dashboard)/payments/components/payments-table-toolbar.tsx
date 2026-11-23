@@ -16,9 +16,9 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { usePaymentsStore } from "@/stores/payments-store"
+import type { Payment } from "@/types/payments"
 import { months, paymentMethods, paymentStatuses } from "../data/data"
 import { downloadPaymentsCsv } from "../data/export-csv"
-import type { Payment } from "@/types/payments"
 import { PaymentsYearSelect } from "./payments-year-select"
 
 interface DataTableToolbarProps<TData> {

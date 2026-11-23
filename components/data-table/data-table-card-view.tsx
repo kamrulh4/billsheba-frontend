@@ -112,7 +112,9 @@ export function DataTableCardView<TData>({
             <ItemContent className="min-w-0 gap-1">
               <ItemTitle className="max-w-full truncate">{item.title}</ItemTitle>
               <ItemDescription className="truncate">{item.description}</ItemDescription>
-              {item.meta && <div className="flex flex-wrap items-center gap-1.5">{item.meta}</div>}
+              {item.meta && (
+                <div className="flex flex-wrap items-center gap-1.5">{item.meta}</div>
+              )}
             </ItemContent>
             {item.trailing && <div className="shrink-0 text-right">{item.trailing}</div>}
             <ItemActions onClick={(e) => e.stopPropagation()}>

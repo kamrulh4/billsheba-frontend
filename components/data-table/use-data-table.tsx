@@ -138,10 +138,17 @@ export function useDataTable<TData, TValue>({
                 {table.getFooterGroups().map((group) => (
                   <TableRow key={group.id}>
                     {group.headers.map((header) => (
-                      <TableCell key={header.id} colSpan={header.colSpan} className="font-semibold">
+                      <TableCell
+                        key={header.id}
+                        colSpan={header.colSpan}
+                        className="font-semibold"
+                      >
                         {header.isPlaceholder
                           ? null
-                          : flexRender(header.column.columnDef.footer, header.getContext())}
+                          : flexRender(
+                              header.column.columnDef.footer,
+                              header.getContext(),
+                            )}
                       </TableCell>
                     ))}
                   </TableRow>
