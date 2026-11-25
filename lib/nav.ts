@@ -62,3 +62,14 @@ export const navItems: NavItem[] = [
 
 export const canSee = (item: NavItem, kind?: string) =>
   !item.roles || (!!kind && item.roles.includes(kind))
+
+/** Pages without a menu entry that are still limited to some roles. */
+const EXTRA_ROLES: Record<string, string[]> = { "/sms": MANAGERS }
+
+/** May this role open the page at `path`? Unlisted pages (profile, ...) are open to everyone signed in. */
+export function canOpen(path: string, kind?: string) {
+  const roles =
+    EXTRA_ROLES[path] ??
+    navItems.find((i) => path === i.url || path.startsWith(`${i.url}/`))?.roles
+  return !roles || (!!kind && roles.includes(kind))
+}

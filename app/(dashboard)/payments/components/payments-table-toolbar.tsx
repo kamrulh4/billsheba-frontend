@@ -15,8 +15,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { useCan } from "@/lib/permissions"
 import { usePaymentsStore } from "@/stores/payments-store"
 import type { Payment } from "@/types/payments"
+import { collectorName } from "../data/collector"
 import { months, paymentMethods, paymentStatuses } from "../data/data"
 import { downloadPaymentsCsv } from "../data/export-csv"
 import { PaymentsYearSelect } from "./payments-year-select"
@@ -26,6 +28,7 @@ interface DataTableToolbarProps<TData> {
 }
 
 export function PaymentsTableToolbar<TData>({ table }: DataTableToolbarProps<TData>) {
+  const { manage } = useCan()
   const isFiltered = table.getState().columnFilters.length > 0
 
   const { setPaymentMutationType, setIsUpsertPaymentDialogOpen, paymentFilters } =
@@ -36,9 +39,7 @@ export function PaymentsTableToolbar<TData>({ table }: DataTableToolbarProps<TDa
     const seen = new Map<string, string>()
     for (const row of table.getCoreRowModel().rows) {
       const key = String(row.getValue("entry_by"))
-      const by = (row.original as Payment).entry_by
-      const name = by ? `${by.first_name || ""} ${by.last_name || ""}`.trim() : ""
-      seen.set(key, name || "None")
+      seen.set(key, collectorName(row.original as Payment))
     }
     return [...seen].map(([value, label]) => ({ value, label }))
   }, [table.getCoreRowModel().rows])
@@ -111,18 +112,20 @@ export function PaymentsTableToolbar<TData>({ table }: DataTableToolbarProps<TDa
         )}
       </div>
 
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() =>
-          downloadPaymentsCsv(
-            table.getFilteredRowModel().rows.map((r) => r.original as Payment),
-          )
-        }
-      >
-        <Download />
-        <Tx>Export CSV</Tx>
-      </Button>
+      {manage && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() =>
+            downloadPaymentsCsv(
+              table.getFilteredRowModel().rows.map((r) => r.original as Payment),
+            )
+          }
+        >
+          <Download />
+          <Tx>Export CSV</Tx>
+        </Button>
+      )}
 
       <Button
         onClick={() => {

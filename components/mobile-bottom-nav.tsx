@@ -9,6 +9,8 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useSession } from "@/hooks/rq/use-auth-query"
+import { canOpen } from "@/lib/nav"
 import { cn } from "@/lib/utils"
 import { useT } from "@/providers/locale-provider"
 
@@ -23,6 +25,7 @@ const navItems = [
 export function MobileBottomNav() {
   const pathname = usePathname()
   const { t } = useT()
+  const { data: session } = useSession()
 
   return (
     <nav
@@ -32,27 +35,29 @@ export function MobileBottomNav() {
     >
       <div className="mx-auto max-w-screen-lg px-safe w-full">
         <div className="backdrop-blur-sm bg-card/80 border-t border-border flex justify-between items-center px-4 py-2 rounded-t-lg">
-          {navItems.map((item) => {
-            const Icon = item.icon
+          {navItems
+            .filter((item) => canOpen(item.href, session?.kind))
+            .map((item) => {
+              const Icon = item.icon
 
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "flex flex-col items-center gap-1 px-2 py-1 text-xs text-muted-foreground hover:text-foreground",
-                  pathname === item.href && "text-primary outline-none",
-                )}
-                aria-label={t(item.label)}
-                title={t(item.label)}
-              >
-                <Icon className="h-5 w-5" aria-hidden={true}>
-                  <title>{t(item.label)}</title>
-                </Icon>
-                <span className="sr-only">{t(item.label)}</span>
-              </Link>
-            )
-          })}
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex flex-col items-center gap-1 px-2 py-1 text-xs text-muted-foreground hover:text-foreground",
+                    pathname === item.href && "text-primary outline-none",
+                  )}
+                  aria-label={t(item.label)}
+                  title={t(item.label)}
+                >
+                  <Icon className="h-5 w-5" aria-hidden={true}>
+                    <title>{t(item.label)}</title>
+                  </Icon>
+                  <span className="sr-only">{t(item.label)}</span>
+                </Link>
+              )
+            })}
         </div>
       </div>
     </nav>

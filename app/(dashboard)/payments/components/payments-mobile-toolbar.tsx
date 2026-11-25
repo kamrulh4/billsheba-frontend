@@ -20,6 +20,7 @@ import { useSession } from "@/hooks/rq/use-auth-query"
 import { useT } from "@/providers/locale-provider"
 import { usePaymentsStore } from "@/stores/payments-store"
 import type { Payment } from "@/types/payments"
+import { collectorName } from "../data/collector"
 import { months, paymentMethods } from "../data/data"
 import { downloadPaymentsCsv } from "../data/export-csv"
 import { PaymentsYearSelect } from "./payments-year-select"
@@ -51,9 +52,7 @@ export function PaymentsMobileToolbar({ table }: { table: Table<Payment> }) {
   const collectors = useMemo(() => {
     const seen = new Map<string, string>()
     for (const row of rows) {
-      const by = row.original.entry_by
-      const name = by ? `${by.first_name || ""} ${by.last_name || ""}`.trim() : ""
-      seen.set(String(row.getValue("entry_by")), name || p("None"))
+      seen.set(String(row.getValue("entry_by")), p(collectorName(row.original)))
     }
     return [...seen].map(([value, label]) => ({ value, label }))
   }, [rows, p])

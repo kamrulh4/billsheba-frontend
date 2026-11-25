@@ -16,9 +16,11 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { usePaymentRequests, useReviewPaymentRequest } from "@/hooks/rq/use-saas-query"
+import { useCan } from "@/lib/permissions"
 import { useT } from "@/providers/locale-provider"
 
 export function PaymentRequestsClient() {
+  const { manage } = useCan()
   const { t, money } = useT()
   const [status, setStatus] = useState("PENDING")
   const { data, isLoading } = usePaymentRequests(status || undefined)
@@ -84,7 +86,7 @@ export function PaymentRequestsClient() {
                     </Badge>
                   </TableCell>
                   <TableCell className="space-x-1 whitespace-nowrap">
-                    {r.request_status === "PENDING" && (
+                    {manage && r.request_status === "PENDING" && (
                       <>
                         <Button
                           size="sm"

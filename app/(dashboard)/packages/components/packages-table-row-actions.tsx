@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useDeletePackage } from "@/hooks/rq/use-packages-query"
+import { useCan } from "@/lib/permissions"
 import { usePackagesStore } from "@/stores/packages-store"
 import { Package } from "@/types/packages"
 
@@ -31,6 +32,7 @@ export function PackagesTableRowActions({ row }: PackagesTableRowActionsProps) {
   } = usePackagesStore()
 
   const [open, setOpen] = useState(false)
+  const { manage } = useCan()
 
   const { mutate: triggerDeletePackage, isPending } = useDeletePackage()
 
@@ -58,26 +60,30 @@ export function PackagesTableRowActions({ row }: PackagesTableRowActionsProps) {
           >
             <Tx>View</Tx>
           </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => {
-              setIsUpsertPackageDialogOpen(true)
-              setPackageMutationType("edit")
-              setSelectedPackage(row.original)
-            }}
-          >
-            <Tx>Edit</Tx>
-          </DropdownMenuItem>
+          {manage && (
+            <>
+              <DropdownMenuItem
+                onClick={() => {
+                  setIsUpsertPackageDialogOpen(true)
+                  setPackageMutationType("edit")
+                  setSelectedPackage(row.original)
+                }}
+              >
+                <Tx>Edit</Tx>
+              </DropdownMenuItem>
 
-          <DropdownMenuSeparator />
+              <DropdownMenuSeparator />
 
-          <DropdownMenuItem
-            onClick={() => {
-              setOpen(true)
-            }}
-          >
-            <Tx>Delete</Tx>
-            <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
-          </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  setOpen(true)
+                }}
+              >
+                <Tx>Delete</Tx>
+                <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
+              </DropdownMenuItem>
+            </>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
 

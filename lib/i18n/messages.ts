@@ -57,7 +57,7 @@ const en = {
   "collections.collector": "Collector",
   "collections.none": "No cash collections in this period",
   "collections.cashOnly":
-    "Counts cash payments entered by a person. bKash/online payments go straight to your account.",
+    "Counts every payment a person entered (cash, bKash to their number, etc.). Payments customers make through the bKash gateway go straight to your account.",
   "collections.record": "Record a deposit",
   "collections.note": "Note (optional)",
   "collections.save": "Record deposit",
@@ -539,7 +539,7 @@ const bn: Record<MessageKey, string> = {
   "collections.collector": "কালেক্টর",
   "collections.none": "এই সময়ে কোনো নগদ আদায় নেই",
   "collections.cashOnly":
-    "কেউ হাতে নিয়ে এন্ট্রি করা নগদ পেমেন্ট ধরা হয়। বিকাশ/অনলাইন পেমেন্ট সরাসরি আপনার অ্যাকাউন্টে যায়।",
+    "কেউ এন্ট্রি করা সব পেমেন্ট ধরা হয় (নগদ, তার নিজের নম্বরে বিকাশ ইত্যাদি)। কাস্টমার নিজে গেটওয়ে দিয়ে দিলে সেটা সরাসরি আপনার অ্যাকাউন্টে যায়।",
   "collections.record": "জমা নথিভুক্ত করুন",
   "collections.note": "নোট (ঐচ্ছিক)",
   "collections.save": "জমা সংরক্ষণ",

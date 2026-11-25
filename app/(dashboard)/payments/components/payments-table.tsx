@@ -9,6 +9,7 @@ import { useGetPaymentList } from "@/hooks/rq/use-payment-query"
 import { cn, generateAvatarUrl } from "@/lib/utils"
 import { usePaymentsStore } from "@/stores/payments-store"
 import type { Payment } from "@/types/payments"
+import { collectorName } from "../data/collector"
 import { columns } from "./columns"
 import { PaymentsMobileToolbar } from "./payments-mobile-toolbar"
 import { PaymentsTableRowActions } from "./payments-table-row-actions"
@@ -24,12 +25,13 @@ export function PaymentsTable() {
     columns,
     data: paymentsData?.results!,
     loading: isLoading,
-    showFooter: true,
   })
 
   const shown = table.getFilteredRowModel().rows.map((r) => r.original)
   const paidRows = shown.filter((x) => x.paid)
   const sum = (list: Payment[]) => list.reduce((t, x) => t + (Number(x.amount) || 0), 0)
+  const billed = (list: Payment[]) =>
+    list.reduce((t, x) => t + (Number(x.bill_amount) || 0), 0)
   const perDay = new Map<string, number>()
   for (const x of paidRows)
     perDay.set(dayKey(x), (perDay.get(dayKey(x)) ?? 0) + (Number(x.amount) || 0))
@@ -49,13 +51,14 @@ export function PaymentsTable() {
             mapRow={(row) => {
               const p = row.original
 
-              const by = p.entry_by
-              const collector = by
-                ? `${by.first_name || ""} ${by.last_name || ""}`.trim()
-                : ""
+              const collector = collectorName(p)
               return {
                 title: p.customer.name || p.customer.username,
-                description: [p.customer.username, collector && `by ${collector}`]
+                description: [
+                  p.customer.username,
+                  collector !== "None" &&
+                    (collector === "Online" ? "Online" : `by ${collector}`),
+                ]
                   .filter(Boolean)
                   .join(" · "),
                 avatar: generateAvatarUrl(p.customer.username || p.customer.name),
@@ -108,31 +111,23 @@ export function PaymentsTable() {
           />
         </div>
 
+        <div className="hidden md:block">{render}</div>
+
         {shown.length > 0 && (
-          <div className="sticky bottom-20 z-10 flex items-center justify-between rounded-2xl border bg-card/90 px-4 py-2.5 shadow-lg backdrop-blur md:hidden">
-            <div>
-              <div className="text-muted-foreground text-[11px]">
-                {paidRows.length} <Tx>paid</Tx>
-              </div>
-              <div className="font-bold text-emerald-600 text-lg dark:text-emerald-400">
-                ৳{sum(paidRows).toLocaleString("en-US")}
-              </div>
-            </div>
-            <div className="text-right">
-              <div className="text-muted-foreground text-[11px]">
-                <Tx>Cash</Tx>
-              </div>
-              <div className="font-bold text-lg">
-                ৳
-                {sum(paidRows.filter((x) => x.payment_method === "CASH")).toLocaleString(
-                  "en-US",
-                )}
-              </div>
-            </div>
+          <div className="sticky bottom-20 z-10 mx-auto flex w-full max-w-3xl items-center justify-between gap-4 rounded-2xl border bg-card/90 px-4 py-2.5 shadow-lg backdrop-blur md:bottom-4">
+            <Stat
+              label={`${paidRows.length} paid`}
+              value={sum(paidRows)}
+              tone="emerald"
+            />
+            <Stat label="Billed" value={billed(paidRows)} className="hidden sm:block" />
+            <Stat
+              label="Cash"
+              value={sum(paidRows.filter((x) => x.payment_method === "CASH"))}
+              align="right"
+            />
           </div>
         )}
-
-        <div className="hidden md:block">{render}</div>
 
         <PaymentsUpsertDialog />
         <ViewPaymentsDialog />
@@ -157,4 +152,34 @@ function dayLabel(p: Payment) {
 
 function monthName(m: string) {
   return m ? m.charAt(0) + m.slice(1).toLowerCase() : ""
+}
+
+function Stat({
+  label,
+  value,
+  tone,
+  align,
+  className,
+}: {
+  label: string
+  value: number
+  tone?: "emerald"
+  align?: "right"
+  className?: string
+}) {
+  return (
+    <div className={cn(align === "right" && "text-right", className)}>
+      <div className="text-muted-foreground text-[11px]">
+        <Tx>{label}</Tx>
+      </div>
+      <div
+        className={cn(
+          "font-bold text-lg tabular-nums",
+          tone === "emerald" && "text-emerald-600 dark:text-emerald-400",
+        )}
+      >
+        ৳{value.toLocaleString("en-US")}
+      </div>
+    </div>
+  )
 }

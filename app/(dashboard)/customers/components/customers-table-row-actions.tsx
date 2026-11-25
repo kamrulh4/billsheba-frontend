@@ -24,6 +24,7 @@ import {
   useDeleteCustomer,
   useToggleCustomerStatus,
 } from "@/hooks/rq/use-customers-query"
+import { useCan } from "@/lib/permissions"
 import { useCustomersStore } from "@/stores/customers-store"
 import { Customer } from "@/types/customers"
 import { customerStatus } from "../data/data"
@@ -47,6 +48,7 @@ export function CustomersTableRowActions({ row }: CustomersTableRowActionsProps)
   const status = row.original.is_active ? "true" : "false"
   const [optimisticStatus, setOptimisticStatus] = useOptimistic<string>(status)
   const [open, setOpen] = useState(false)
+  const { manage } = useCan()
 
   function onDeleteHandler() {
     triggerDeleteCustomer(row.original.uid)
@@ -72,60 +74,64 @@ export function CustomersTableRowActions({ row }: CustomersTableRowActionsProps)
           >
             <Tx>View</Tx>
           </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => {
-              setIsUpsertCustomerDialogOpen(true)
-              setCustomerMutationType("edit")
-              setSelectedCustomer(row.original)
-            }}
-          >
-            <Tx>Edit</Tx>
-          </DropdownMenuItem>
+          {manage && (
+            <>
+              <DropdownMenuItem
+                onClick={() => {
+                  setIsUpsertCustomerDialogOpen(true)
+                  setCustomerMutationType("edit")
+                  setSelectedCustomer(row.original)
+                }}
+              >
+                <Tx>Edit</Tx>
+              </DropdownMenuItem>
 
-          <DropdownMenuSeparator />
+              <DropdownMenuSeparator />
 
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <Tx>Status</Tx>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent>
-                <DropdownMenuRadioGroup
-                  value={optimisticStatus}
-                  onValueChange={(val) => {
-                    setOptimisticStatus(val)
-                    triggerToogleCustomerStatus(
-                      {
-                        username: row.original.username,
-                        is_active: val === "true",
-                      },
-                      {
-                        onError: () => {
-                          setOptimisticStatus(status) // revert on error
-                        },
-                      },
-                    )
-                  }}
-                >
-                  {customerStatus.map((s) => (
-                    <DropdownMenuRadioItem value={s.value}>
-                      <s.icon /> {s.label}
-                    </DropdownMenuRadioItem>
-                  ))}
-                </DropdownMenuRadioGroup>
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>
+                  <Tx>Status</Tx>
+                </DropdownMenuSubTrigger>
+                <DropdownMenuPortal>
+                  <DropdownMenuSubContent>
+                    <DropdownMenuRadioGroup
+                      value={optimisticStatus}
+                      onValueChange={(val) => {
+                        setOptimisticStatus(val)
+                        triggerToogleCustomerStatus(
+                          {
+                            username: row.original.username,
+                            is_active: val === "true",
+                          },
+                          {
+                            onError: () => {
+                              setOptimisticStatus(status) // revert on error
+                            },
+                          },
+                        )
+                      }}
+                    >
+                      {customerStatus.map((s) => (
+                        <DropdownMenuRadioItem value={s.value}>
+                          <s.icon /> {s.label}
+                        </DropdownMenuRadioItem>
+                      ))}
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+              </DropdownMenuSub>
 
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={() => {
-              setOpen(true)
-            }}
-          >
-            <Tx>Delete</Tx>
-            <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
-          </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => {
+                  setOpen(true)
+                }}
+              >
+                <Tx>Delete</Tx>
+                <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
+              </DropdownMenuItem>
+            </>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
 

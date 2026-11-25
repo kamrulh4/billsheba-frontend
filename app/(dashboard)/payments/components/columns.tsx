@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { cn, generateAvatarUrl, getInitials } from "@/lib/utils"
 import { Payment } from "@/types/payments"
+import { collectorName } from "../data/collector"
 import { paymentMethods } from "../data/data"
 import { PaymentsTableRowActions } from "./payments-table-row-actions"
 
@@ -47,10 +48,8 @@ export const columns: ColumnDef<Payment>[] = [
   {
     accessorKey: "entry_by",
     accessorFn: (row) => {
-      const { first_name, last_name, phone } = row.entry_by || {}
-
-      const name =
-        first_name || last_name ? `${first_name || ""} ${last_name || ""}` : "None"
+      const name = collectorName(row)
+      const phone = row.entry_by?.phone ?? ""
 
       return `${name} ${phone}`
     },
@@ -65,10 +64,8 @@ export const columns: ColumnDef<Payment>[] = [
       <DataTableColumnHeader column={column} title="Collected By" />
     ),
     cell: ({ row }) => {
-      const { first_name, last_name, phone } = row.original.entry_by || {}
-
-      const name =
-        first_name || last_name ? `${first_name || ""} ${last_name || ""}` : "None"
+      const name = collectorName(row.original)
+      const phone = row.original.entry_by?.phone
 
       return (
         <div className="flex space-x-2 items-center">

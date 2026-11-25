@@ -153,15 +153,13 @@ export function CustomersMobileToolbar({ table }: { table: Table<Customer> }) {
         />
       </FilterSheet>
 
-      {canManage && (
-        <MobileFab
-          label="Add"
-          onClick={() => {
-            setCustomerMutationType("add")
-            setIsUpsertCustomerDialogOpen(true)
-          }}
-        />
-      )}
+      <MobileFab
+        label="Add"
+        onClick={() => {
+          setCustomerMutationType("add")
+          setIsUpsertCustomerDialogOpen(true)
+        }}
+      />
     </div>
   )
 }

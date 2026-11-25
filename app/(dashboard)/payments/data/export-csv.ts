@@ -1,4 +1,5 @@
 import { Payment } from "@/types/payments"
+import { collectorName } from "./collector"
 
 const cell = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`
 
@@ -19,8 +20,7 @@ export function downloadPaymentsCsv(rows: Payment[]) {
     "Status",
   ]
   const lines = rows.map((p) => {
-    const by = p.entry_by
-    const collector = by ? `${by.first_name || ""} ${by.last_name || ""}`.trim() : ""
+    const collector = collectorName(p)
     return [
       p.payment_date ? new Date(p.payment_date).toISOString().slice(0, 10) : "",
       p.customer.name,

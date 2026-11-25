@@ -4,6 +4,7 @@ import { AppSidebar } from "@/components/app-sidebar"
 import DashboardHeader from "@/components/dashboard-header"
 import { LocaleBoundary } from "@/components/locale-boundary"
 import { MobileBottomNav } from "@/components/mobile-bottom-nav"
+import { RouteGuard } from "@/components/route-guard"
 import { SubscriptionBanner } from "@/components/subscription-banner"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 
@@ -21,7 +22,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <SidebarInset>
             <DashboardHeader />
             <SubscriptionBanner />
-            <main className="p-4 pb-20 md:pb-4">{children}</main>
+            <main className="p-4 pb-20 md:pb-4">
+              <RouteGuard>{children}</RouteGuard>
+            </main>
           </SidebarInset>
           <MobileBottomNav />
         </SidebarProvider>

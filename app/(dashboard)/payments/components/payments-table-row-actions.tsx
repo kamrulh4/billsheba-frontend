@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useDeletePayment } from "@/hooks/rq/use-payment-query"
+import { useCan } from "@/lib/permissions"
 import { usePaymentsStore } from "@/stores/payments-store"
 import { Payment } from "@/types/payments"
 
@@ -33,6 +34,7 @@ export function PaymentsTableRowActions({ row }: PaymentsTableRowActionsProps) {
   const { mutate: triggerDeletePayment } = useDeletePayment()
 
   const [open, setOpen] = useState(false)
+  const { manage } = useCan()
 
   function onDeleteHandler() {
     triggerDeletePayment(row.original.uid)
@@ -75,15 +77,19 @@ export function PaymentsTableRowActions({ row }: PaymentsTableRowActionsProps) {
             <Tx>Edit</Tx>
           </DropdownMenuItem>
 
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={() => {
-              setOpen(true)
-            }}
-          >
-            <Tx>Delete</Tx>
-            <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
-          </DropdownMenuItem>
+          {manage && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => {
+                  setOpen(true)
+                }}
+              >
+                <Tx>Delete</Tx>
+                <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
+              </DropdownMenuItem>
+            </>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
 

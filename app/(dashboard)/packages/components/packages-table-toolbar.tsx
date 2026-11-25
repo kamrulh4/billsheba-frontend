@@ -6,6 +6,7 @@ import { DataTableSearch } from "@/components/data-table/data-table-search"
 import { DataTableViewOptions } from "@/components/data-table/data-table-view-options"
 import { Tx } from "@/components/tx"
 import { Button } from "@/components/ui/button"
+import { useCan } from "@/lib/permissions"
 import { usePackagesStore } from "@/stores/packages-store"
 import { RouterProfilesButton } from "./router-profiles-dialog"
 
@@ -14,6 +15,7 @@ interface DataTableToolbarProps<TData> {
 }
 
 export function PackagesTableToolbar<TData>({ table }: DataTableToolbarProps<TData>) {
+  const { manage } = useCan()
   const isFiltered = table.getState().columnFilters.length > 0
 
   const { setPackageMutationType, setIsUpsertPackageDialogOpen } = usePackagesStore()
@@ -47,18 +49,22 @@ export function PackagesTableToolbar<TData>({ table }: DataTableToolbarProps<TDa
         )}
       </div>
 
-      <RouterProfilesButton />
-      <Button
-        onClick={() => {
-          setIsUpsertPackageDialogOpen(true)
-          setPackageMutationType("add")
-        }}
-        size="sm"
-        className="md:mr-2"
-      >
-        <Plus />
-        <Tx>Add Package</Tx>
-      </Button>
+      {manage && (
+        <>
+          <RouterProfilesButton />
+          <Button
+            onClick={() => {
+              setIsUpsertPackageDialogOpen(true)
+              setPackageMutationType("add")
+            }}
+            size="sm"
+            className="md:mr-2"
+          >
+            <Plus />
+            <Tx>Add Package</Tx>
+          </Button>
+        </>
+      )}
 
       <DataTableViewOptions table={table} />
     </div>

@@ -9,6 +9,7 @@ import { DataTableViewOptions } from "@/components/data-table/data-table-view-op
 import { Tx } from "@/components/tx"
 import { Button } from "@/components/ui/button"
 import { useImportCustomers, useMyOrganization } from "@/hooks/rq/use-saas-query"
+import { useCan } from "@/lib/permissions"
 import { useCustomersStore } from "@/stores/customers-store"
 import { connectionType, customerStatus, presenceOptions } from "../data/data"
 import { RouterImportButton } from "./router-import-dialog"
@@ -24,6 +25,7 @@ export function CustomersTableToolbar<TData>({ table }: DataTableToolbarProps<TD
   const fileInput = useRef<HTMLInputElement>(null)
   const importCustomers = useImportCustomers()
   const { data: organization } = useMyOrganization()
+  const { manage } = useCan()
 
   return (
     <div className="flex gap-2 md:items-center md:justify-between flex-col md:flex-row">
@@ -78,18 +80,20 @@ export function CustomersTableToolbar<TData>({ table }: DataTableToolbarProps<TD
           e.target.value = ""
         }}
       />
-      {organization?.router_configured && <RouterImportButton />}
-      <Button
-        variant="outline"
-        size="sm"
-        className="mr-2"
-        loading={importCustomers.isPending}
-        onClick={() => fileInput.current?.click()}
-        title="CSV columns: name, phone, username, password, package, area, address"
-      >
-        <Upload />
-        <Tx>Import CSV</Tx>
-      </Button>
+      {manage && organization?.router_configured && <RouterImportButton />}
+      {manage && (
+        <Button
+          variant="outline"
+          size="sm"
+          className="mr-2"
+          loading={importCustomers.isPending}
+          onClick={() => fileInput.current?.click()}
+          title="CSV columns: name, phone, username, password, package, area, address"
+        >
+          <Upload />
+          <Tx>Import CSV</Tx>
+        </Button>
+      )}
       <Button
         onClick={() => {
           setIsUpsertCustomerDialogOpen(true)
