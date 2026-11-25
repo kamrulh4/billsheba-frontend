@@ -11,6 +11,7 @@ import { generateAvatarUrl } from "@/lib/utils"
 import { useCustomersStore } from "@/stores/customers-store"
 import type { Customer } from "@/types/customers"
 import { columns as allColumns } from "./columns"
+import { CustomersMobileToolbar } from "./customers-mobile-toolbar"
 import { CustomersTableRowActions } from "./customers-table-row-actions"
 import { CustomersTableToolbar } from "./customers-table-toolbar"
 import { UpsertCustomersDialog } from "./upsert-customers-dialog"
@@ -63,7 +64,10 @@ export function CustomersTable() {
 
   return (
     <div className="space-y-4">
-      <CustomersTableToolbar table={table} />
+      <div className="hidden md:block">
+        <CustomersTableToolbar table={table} />
+      </div>
+      <CustomersMobileToolbar table={table} />
 
       {/* mobile: card view */}
       <div className="block md:hidden">
@@ -102,7 +106,7 @@ export function CustomersTable() {
                   </Badge>
                   {dayBased && customer.subscription_end_date && (
                     <span className="text-xs text-muted-foreground">
-                      → {customer.subscription_end_date}
+                      · {shortDate(customer.subscription_end_date)}
                     </span>
                   )}
                 </>
@@ -136,4 +140,11 @@ function presenceDot(state?: string, routerOn = false) {
   if (state === "offline") return { className: "bg-red-500", label: "Offline" }
   // router connected but this customer cannot be judged (not PPPoE / router unreadable): grey dot
   return routerOn ? { className: "bg-slate-400", label: "Unknown" } : undefined
+}
+
+function shortDate(iso: string) {
+  const d = new Date(iso)
+  return Number.isNaN(d.getTime())
+    ? iso
+    : d.toLocaleDateString("en-GB", { day: "2-digit", month: "short" })
 }

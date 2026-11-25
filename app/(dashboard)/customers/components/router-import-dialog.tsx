@@ -40,7 +40,7 @@ export function RouterImportButton() {
   )
 }
 
-function RouterImportDialog({ onClose }: { onClose: () => void }) {
+export function RouterImportDialog({ onClose }: { onClose: () => void }) {
   const { t, num } = useT()
   const preview = useRouterImportPreview(true)
   const run = useRouterImport()

@@ -80,7 +80,7 @@ export function PaymentsTableToolbar<TData>({ table }: DataTableToolbarProps<TDa
           />
         )}
 
-        {table.getColumn("entry_by") && collectors.length > 0 && (
+        {table.getColumn("entry_by") && (
           <DataTableFacetedFilter
             column={table.getColumn("entry_by")}
             title="Collected By"
