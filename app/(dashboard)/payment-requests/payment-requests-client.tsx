@@ -3,10 +3,10 @@
 import { Check, X } from "lucide-react"
 import { useState } from "react"
 import { PageHeader } from "@/components/page-header"
+import { SegmentedTabs } from "@/components/segmented-tabs"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { NativeSelect } from "@/components/ui/native-select"
 import {
   Table,
   TableBody,
@@ -18,6 +18,13 @@ import {
 import { usePaymentRequests, useReviewPaymentRequest } from "@/hooks/rq/use-saas-query"
 import { useCan } from "@/lib/permissions"
 import { useT } from "@/providers/locale-provider"
+import type { PaymentRequest } from "@/types/saas"
+
+const STATUS_LABEL = {
+  PENDING: "common.pending",
+  APPROVED: "common.approved",
+  REJECTED: "common.rejected",
+} as const
 
 export function PaymentRequestsClient() {
   const { manage } = useCan()
@@ -26,25 +33,82 @@ export function PaymentRequestsClient() {
   const { data, isLoading } = usePaymentRequests(status || undefined)
   const review = useReviewPaymentRequest()
 
+  const statusBadge = (r: PaymentRequest) => (
+    <Badge variant={r.request_status === "PENDING" ? "outline" : "secondary"}>
+      {t(STATUS_LABEL[r.request_status])}
+    </Badge>
+  )
+  const reviewButtons = (id: number) => (
+    <>
+      <Button
+        size="sm"
+        disabled={review.isPending}
+        onClick={() => review.mutate({ id, action: "approve" })}
+      >
+        <Check /> {t("common.approve")}
+      </Button>
+      <Button
+        size="sm"
+        variant="outline"
+        disabled={review.isPending}
+        onClick={() => review.mutate({ id, action: "reject" })}
+      >
+        <X /> {t("common.reject")}
+      </Button>
+    </>
+  )
+
   return (
     <div className="space-y-4">
-      <PageHeader
-        title={t("requests.title")}
-        description={t("requests.sub")}
-        actions={
-          <NativeSelect
-            className="w-40"
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-          >
-            <option value="PENDING">{t("common.pending")}</option>
-            <option value="APPROVED">{t("common.approved")}</option>
-            <option value="REJECTED">{t("common.rejected")}</option>
-            <option value="">{t("common.all")}</option>
-          </NativeSelect>
-        }
+      <PageHeader title={t("requests.title")} description={t("requests.sub")} />
+
+      <SegmentedTabs
+        value={status}
+        onChange={setStatus}
+        tabs={[
+          { value: "PENDING", label: t("common.pending") },
+          { value: "APPROVED", label: t("common.approved") },
+          { value: "REJECTED", label: t("common.rejected") },
+          { value: "", label: t("common.all") },
+        ]}
       />
-      <Card>
+
+      {/* phones: cards */}
+      <div className="space-y-2 md:hidden">
+        {isLoading && (
+          <p className="py-8 text-center text-muted-foreground">{t("common.loading")}</p>
+        )}
+        {data && data.results.length === 0 && (
+          <p className="py-8 text-center text-muted-foreground">{t("common.nothing")}</p>
+        )}
+        {data?.results.map((r) => (
+          <div key={r.id} className="space-y-2 rounded-2xl border bg-card p-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="truncate font-semibold">{r.customer_name}</div>
+                <div className="text-muted-foreground text-xs">{r.customer_phone}</div>
+              </div>
+              <div className="text-right">
+                <div className="font-bold tabular-nums">{money(r.amount)}</div>
+                <div className="text-muted-foreground text-xs">
+                  {r.billing_month} {r.billing_year}
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center justify-between gap-2 text-sm">
+              <span className="min-w-0 truncate">
+                {r.payment_method} · <span className="font-mono">{r.transaction_id}</span>
+              </span>
+              {statusBadge(r)}
+            </div>
+            {manage && r.request_status === "PENDING" && (
+              <div className="grid grid-cols-2 gap-2">{reviewButtons(r.id)}</div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <Card className="hidden md:block">
         <CardContent className="pt-6">
           <Table>
             <TableHeader>
@@ -78,33 +142,9 @@ export function PaymentRequestsClient() {
                     {r.billing_month} {r.billing_year}
                   </TableCell>
                   <TableCell className="text-right">{money(r.amount)}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={r.request_status === "PENDING" ? "outline" : "secondary"}
-                    >
-                      {r.request_status}
-                    </Badge>
-                  </TableCell>
+                  <TableCell>{statusBadge(r)}</TableCell>
                   <TableCell className="space-x-1 whitespace-nowrap">
-                    {manage && r.request_status === "PENDING" && (
-                      <>
-                        <Button
-                          size="sm"
-                          disabled={review.isPending}
-                          onClick={() => review.mutate({ id: r.id, action: "approve" })}
-                        >
-                          <Check /> {t("common.approve")}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          disabled={review.isPending}
-                          onClick={() => review.mutate({ id: r.id, action: "reject" })}
-                        >
-                          <X /> {t("common.reject")}
-                        </Button>
-                      </>
-                    )}
+                    {manage && r.request_status === "PENDING" && reviewButtons(r.id)}
                   </TableCell>
                 </TableRow>
               ))}

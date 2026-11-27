@@ -37,12 +37,7 @@ export function RouterProfilesButton() {
   if (!organization?.router_configured) return null
   return (
     <>
-      <Button
-        variant="outline"
-        size="sm"
-        className="md:mr-2"
-        onClick={() => setOpen(true)}
-      >
+      <Button variant="outline" onClick={() => setOpen(true)}>
         <Router />
         {t("profiles.button")}
       </Button>

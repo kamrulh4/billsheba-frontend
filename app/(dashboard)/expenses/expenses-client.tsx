@@ -1,10 +1,18 @@
 "use client"
 
-import { Trash2 } from "lucide-react"
+import { Plus, Trash2 } from "lucide-react"
 import { useState } from "react"
+import { MobileFab } from "@/components/data-table/mobile-ui"
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { NativeSelect } from "@/components/ui/native-select"
 import {
@@ -29,88 +37,82 @@ const CATEGORIES = [
   ["OTHER", "Other", "অন্যান্য"],
 ] as const
 
-const today = () => new Date().toISOString().slice(0, 10)
+const today = () => new Date().toLocaleDateString("en-CA") // local date, not UTC
 
 export function ExpensesClient() {
   const { t, locale, money } = useT()
   const { data, isLoading } = useExpenses()
-  const { create, remove } = useExpenseMutations()
-  const [form, setForm] = useState({
-    name: "",
-    category: "OTHER",
-    amount: "",
-    expense_date: today(),
-  })
+  const { remove } = useExpenseMutations()
+  const [adding, setAdding] = useState(false)
 
-  const total = (data?.results ?? []).reduce((s, e) => s + Number(e.amount), 0)
+  const rows = data?.results ?? []
+  const sum = (list: typeof rows) => list.reduce((s, e) => s + Number(e.amount), 0)
+  const thisMonth = rows.filter((e) => e.expense_date.startsWith(today().slice(0, 7)))
+  const category = (value: string) =>
+    CATEGORIES.find((c) => c[0] === value)?.[locale === "bn" ? 2 : 1] ?? value
+  const empty = isLoading
+    ? t("common.loading")
+    : rows.length === 0
+      ? t("expenses.empty")
+      : null
+  const deleteButton = (uid: string) => (
+    <Button
+      size="icon"
+      variant="ghost"
+      aria-label="Delete expense"
+      onClick={() => confirm(t("common.areYouSure")) && remove.mutate(uid)}
+    >
+      <Trash2 className="size-4" />
+    </Button>
+  )
 
   return (
-    <div className="space-y-4">
-      <PageHeader title={t("expenses.title")} description={t("expenses.sub")} />
+    <div className="space-y-4 pb-16 md:pb-0">
+      <PageHeader
+        title={t("expenses.title")}
+        description={t("expenses.sub")}
+        actions={
+          <Button className="hidden md:inline-flex" onClick={() => setAdding(true)}>
+            <Plus />
+            {t("expenses.add")}
+          </Button>
+        }
+      />
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">{t("expenses.add")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form
-            className="grid gap-3 sm:grid-cols-5"
-            onSubmit={(e) => {
-              e.preventDefault()
-              create.mutate(form, {
-                onSuccess: () => setForm({ ...form, name: "", amount: "" }),
-              })
-            }}
+      <div className="grid grid-cols-2 gap-3 sm:max-w-xl">
+        {[
+          [t("expenses.thisMonth"), money(sum(thisMonth))],
+          [t("expenses.totalListed"), money(sum(rows))],
+        ].map(([label, value]) => (
+          <div key={label} className="rounded-xl border bg-card px-4 py-3">
+            <div className="text-muted-foreground text-xs sm:text-sm">{label}</div>
+            <div className="font-bold text-xl tabular-nums sm:text-2xl">{value}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* phones: cards */}
+      <div className="space-y-2 md:hidden">
+        {empty && <p className="py-8 text-center text-muted-foreground">{empty}</p>}
+        {rows.map((e) => (
+          <div
+            key={e.uid}
+            className="flex items-center gap-3 rounded-2xl border bg-card p-3"
           >
-            <Input
-              className="sm:col-span-2"
-              placeholder={t("expenses.what")}
-              required
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-            />
-            <NativeSelect
-              value={form.category}
-              onChange={(e) => setForm({ ...form, category: e.target.value })}
-            >
-              {CATEGORIES.map(([v, en, bn]) => (
-                <option key={v} value={v}>
-                  {locale === "bn" ? bn : en}
-                </option>
-              ))}
-            </NativeSelect>
-            <Input
-              type="number"
-              min="1"
-              step="0.01"
-              placeholder={t("expenses.amount")}
-              required
-              value={form.amount}
-              onChange={(e) => setForm({ ...form, amount: e.target.value })}
-            />
-            <Input
-              type="date"
-              value={form.expense_date}
-              onChange={(e) => setForm({ ...form, expense_date: e.target.value })}
-            />
-            <Button
-              className="sm:col-span-5 sm:w-fit"
-              type="submit"
-              loading={create.isPending}
-            >
-              {t("expenses.add")}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+            <div className="min-w-0 flex-1">
+              <div className="truncate font-semibold">{e.name}</div>
+              <div className="text-muted-foreground text-xs">
+                {category(e.category)} · {e.expense_date}
+              </div>
+            </div>
+            <div className="font-semibold tabular-nums">{money(e.amount)}</div>
+            {deleteButton(e.uid)}
+          </div>
+        ))}
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">
-            {t("expenses.totalListed")}: {money(total)}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+      <Card className="hidden md:block">
+        <CardContent className="pt-6">
           <Table>
             <TableHeader>
               <TableRow>
@@ -122,46 +124,94 @@ export function ExpensesClient() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {isLoading && (
+              {empty && (
                 <TableRow>
-                  <TableCell colSpan={5}>{t("common.loading")}</TableCell>
+                  <TableCell colSpan={5} className="text-center text-muted-foreground">
+                    {empty}
+                  </TableCell>
                 </TableRow>
               )}
-              {data?.results.map((e) => (
+              {rows.map((e) => (
                 <TableRow key={e.uid}>
                   <TableCell>{e.expense_date}</TableCell>
                   <TableCell>{e.name}</TableCell>
-                  <TableCell>
-                    {CATEGORIES.find((c) => c[0] === e.category)?.[
-                      locale === "bn" ? 2 : 1
-                    ] ?? e.category}
-                  </TableCell>
+                  <TableCell>{category(e.category)}</TableCell>
                   <TableCell className="text-right">{money(e.amount)}</TableCell>
-                  <TableCell>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      aria-label="Delete expense"
-                      onClick={() =>
-                        confirm(t("common.areYouSure")) && remove.mutate(e.uid)
-                      }
-                    >
-                      <Trash2 className="size-4" />
-                    </Button>
-                  </TableCell>
+                  <TableCell>{deleteButton(e.uid)}</TableCell>
                 </TableRow>
               ))}
-              {data && data.results.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground">
-                    {t("expenses.empty")}
-                  </TableCell>
-                </TableRow>
-              )}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
+
+      <MobileFab label={t("expenses.add")} onClick={() => setAdding(true)} />
+
+      <Dialog open={adding} onOpenChange={setAdding}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("expenses.add")}</DialogTitle>
+            <DialogDescription>{t("expenses.sub")}</DialogDescription>
+          </DialogHeader>
+          <ExpenseForm onDone={() => setAdding(false)} />
+        </DialogContent>
+      </Dialog>
     </div>
+  )
+}
+
+/** Mounted only while the dialog is open, so it always starts empty. */
+function ExpenseForm({ onDone }: { onDone: () => void }) {
+  const { t, locale } = useT()
+  const { create } = useExpenseMutations()
+  const [form, setForm] = useState({
+    name: "",
+    category: "OTHER",
+    amount: "",
+    expense_date: today(),
+  })
+
+  return (
+    <form
+      className="grid gap-3"
+      onSubmit={(e) => {
+        e.preventDefault()
+        create.mutate(form, { onSuccess: onDone })
+      }}
+    >
+      <Input
+        placeholder={t("expenses.what")}
+        required
+        value={form.name}
+        onChange={(e) => setForm({ ...form, name: e.target.value })}
+      />
+      <NativeSelect
+        value={form.category}
+        onChange={(e) => setForm({ ...form, category: e.target.value })}
+      >
+        {CATEGORIES.map(([v, en, bn]) => (
+          <option key={v} value={v}>
+            {locale === "bn" ? bn : en}
+          </option>
+        ))}
+      </NativeSelect>
+      <Input
+        type="number"
+        min="1"
+        step="0.01"
+        placeholder={t("expenses.amount")}
+        required
+        value={form.amount}
+        onChange={(e) => setForm({ ...form, amount: e.target.value })}
+      />
+      <Input
+        type="date"
+        value={form.expense_date}
+        onChange={(e) => setForm({ ...form, expense_date: e.target.value })}
+      />
+      <Button type="submit" loading={create.isPending}>
+        {t("expenses.add")}
+      </Button>
+    </form>
   )
 }

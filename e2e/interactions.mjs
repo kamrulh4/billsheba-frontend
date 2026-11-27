@@ -61,7 +61,7 @@ ok("signup lands on the dashboard", /dashboard/.test(page.url()), page.url())
 ok(
   "onboarding checklist is shown to a new ISP",
   await page
-    .getByText(/Welcome to Billsheba/i)
+    .getByText(/Setup \d\/4/)
     .isVisible()
     .catch(() => false),
 )
@@ -83,15 +83,15 @@ await page.getByPlaceholder(/Enter price/i).fill("600")
 await page.getByRole("button", { name: /Create Package/i }).click()
 await page.waitForTimeout(1500)
 ok(
-  "package appears in the table",
+  "package appears as a card",
   await page
-    .getByRole("cell", { name: "Home 10" })
+    .getByText("Home 10", { exact: true })
     .first()
     .isVisible()
     .catch(() => false),
 )
 ok(
-  "router-profile column is visible",
+  "the card names the router profile",
   await page
     .getByText("Router profile")
     .first()
