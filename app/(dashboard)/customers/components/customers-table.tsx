@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { useGetCustomerList } from "@/hooks/rq/use-customers-query"
 import { useMyOrganization } from "@/hooks/rq/use-saas-query"
 import { usePresence } from "@/hooks/rq/use-sessions-query"
+import { useHydrated } from "@/hooks/use-hydrated"
 import { generateAvatarUrl } from "@/lib/utils"
 import { useCustomersStore } from "@/stores/customers-store"
 import type { Customer } from "@/types/customers"
@@ -19,6 +20,7 @@ import { ViewCustomersDialog } from "./view-customers-dialog"
 
 export function CustomersTable() {
   const { data: customersData, isLoading } = useGetCustomerList()
+  const hydrated = useHydrated()
   const { setIsViewCustomerDialogOpen, setSelectedCustomer } = useCustomersStore()
 
   const { data: organization } = useMyOrganization()
@@ -62,8 +64,8 @@ export function CustomersTable() {
 
   const { table, render } = useDataTable({
     columns,
-    data: rows!,
-    loading: isLoading,
+    data: hydrated ? rows! : undefined!,
+    loading: isLoading || !hydrated,
     initialVisibility: { presence: false },
   })
 
@@ -77,7 +79,7 @@ export function CustomersTable() {
       {/* mobile: card view */}
       <div className="block md:hidden">
         <DataTableCardView
-          loading={isLoading}
+          loading={isLoading || !hydrated}
           table={table}
           mapRow={(row) => {
             const customer = row.original

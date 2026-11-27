@@ -31,7 +31,7 @@ export function RouterImportButton() {
   const [open, setOpen] = useState(false)
   return (
     <>
-      <Button variant="outline" size="sm" className="mr-2" onClick={() => setOpen(true)}>
+      <Button variant="outline" onClick={() => setOpen(true)}>
         <Router />
         {t("routerImport.button")}
       </Button>

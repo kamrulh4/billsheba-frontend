@@ -53,7 +53,13 @@ export function useDataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [sorting, setSorting] = React.useState<SortingState>([])
 
+  // The library resets the page number while rendering when rows change. Before this component has
+  // mounted that is an illegal state update, so it is only switched on afterwards.
+  const [mounted, setMounted] = React.useState(false)
+  React.useEffect(() => setMounted(true), [])
+
   const table = useReactTable({
+    autoResetPageIndex: mounted,
     data: data || emptyArray,
     columns,
     state: {
