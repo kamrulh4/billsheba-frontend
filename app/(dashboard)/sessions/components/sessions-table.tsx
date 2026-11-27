@@ -27,7 +27,7 @@ export function SessionsTable() {
       <div className="flex flex-col items-center gap-4 rounded-lg border border-dashed p-10 text-center">
         <p className="max-w-md text-muted-foreground">{t("sessions.noRouter")}</p>
         <Button asChild>
-          <Link href="/settings">{t("sessions.noRouterCta")}</Link>
+          <Link href="/settings?tab=router">{t("sessions.noRouterCta")}</Link>
         </Button>
       </div>
     )
