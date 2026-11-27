@@ -3,6 +3,7 @@ import { Suspense } from "react"
 import { getSession } from "@/lib/apis/auth"
 import { OnboardingChecklist } from "./widgets/onboarding-checklist"
 import { OverviewHeader } from "./widgets/overview-header"
+import { RevenueChart } from "./widgets/revenue-chart"
 import { StatsGrid } from "./widgets/stats-grid"
 import { StatsGridSkeleton } from "./widgets/stats-grid-skeleton"
 
@@ -24,6 +25,7 @@ export default function Page() {
       <Suspense fallback={<StatsGridSkeleton />}>
         <StatsGrid />
       </Suspense>
+      <RevenueChart />
     </main>
   )
 }

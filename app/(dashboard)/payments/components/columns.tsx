@@ -19,6 +19,7 @@ const dash = <span className="text-muted-foreground">—</span>
 export const columns: ColumnDef<Payment>[] = [
   {
     accessorKey: "customer",
+    meta: { label: "Customer" },
     accessorFn: (row) =>
       `${row.customer.username} ${row.customer.name} ${row.customer.phone}`,
     header: ({ column }) => <DataTableColumnHeader column={column} title="Customer" />,
@@ -46,6 +47,7 @@ export const columns: ColumnDef<Payment>[] = [
   },
   {
     accessorKey: "entry_by",
+    meta: { label: "Collected By" },
     accessorFn: (row) => {
       const name = collectorName(row)
       const phone = row.entry_by?.phone ?? ""
@@ -86,6 +88,7 @@ export const columns: ColumnDef<Payment>[] = [
   },
   {
     accessorKey: "billing_month",
+    meta: { label: "Bill Amount (BDT)" },
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Bill Amount (BDT)" />
     ),
@@ -109,6 +112,7 @@ export const columns: ColumnDef<Payment>[] = [
   },
   {
     accessorKey: "payment_method",
+    meta: { label: "Method" },
     header: ({ column }) => <DataTableColumnHeader column={column} title="Method" />,
     cell: ({ row }) => {
       const status = paymentMethods.find(
@@ -134,6 +138,7 @@ export const columns: ColumnDef<Payment>[] = [
   },
   {
     accessorKey: "amount",
+    meta: { label: "Amount (BDT)" },
     // accessorFn: (row) => `${row.entry_by?.first_name} ${row.entry_by?.last_name}`,
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Amount (BDT)" />
@@ -151,6 +156,7 @@ export const columns: ColumnDef<Payment>[] = [
   },
   {
     accessorKey: "paid",
+    meta: { label: "Status" },
     header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
     cell: ({ row }) => {
       return (

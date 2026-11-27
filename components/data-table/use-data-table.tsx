@@ -33,6 +33,8 @@ interface DataTableProps<TData, TValue> {
   data: TData[]
   loading?: boolean
   pagination?: boolean
+  /** Columns hidden to begin with, e.g. ones that only exist to be filtered on. */
+  initialVisibility?: VisibilityState
 }
 
 const emptyArray = [] as any[]
@@ -42,10 +44,12 @@ export function useDataTable<TData, TValue>({
   data,
   loading,
   pagination = true,
+  initialVisibility = {},
 }: DataTableProps<TData, TValue>) {
   const { p } = useT()
   const [rowSelection, setRowSelection] = React.useState({})
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>(initialVisibility)
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [sorting, setSorting] = React.useState<SortingState>([])
 

@@ -24,6 +24,8 @@ export function CustomersTable() {
   const { data: organization } = useMyOrganization()
   const { data: presence } = usePresence(!!organization?.router_configured)
 
+  const routerOn = !!organization?.router_configured
+
   // Add the live online/offline state to each row. Only PPPoE customers can be judged from the router's
   // PPPoE sessions; the rest stay "unknown", as does everyone while the router cannot be read.
   const rows = useMemo<Customer[] | undefined>(() => {
@@ -32,14 +34,16 @@ export function CustomersTable() {
     const online = presence?.online
     return list.map((c) => ({
       ...c,
-      presence:
-        !online || c.connection_type !== "PPPoE"
+      // no router, no dot at all
+      presence: !routerOn
+        ? undefined
+        : !online || c.connection_type !== "PPPoE"
           ? "unknown"
           : c.username in online
             ? "online"
             : "offline",
     }))
-  }, [customersData?.results, presence?.online])
+  }, [customersData?.results, presence?.online, routerOn])
 
   // The expiry date only means something when each customer has their own paid period (30/60/90-day
   // cycles). With a calendar-month cycle the server ignores it, so the column would be a column of dashes.
@@ -60,6 +64,7 @@ export function CustomersTable() {
     columns,
     data: rows!,
     loading: isLoading,
+    initialVisibility: { presence: false },
   })
 
   return (

@@ -13,6 +13,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
+import { useT } from "@/providers/locale-provider"
 
 interface DataTableViewOptionsProps<TData> {
   table: Table<TData>
@@ -25,6 +26,7 @@ export function DataTableViewOptions<TData>({
   label = "View",
   className,
 }: DataTableViewOptionsProps<TData>) {
+  const { p } = useT()
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -49,11 +51,13 @@ export function DataTableViewOptions<TData>({
             return (
               <DropdownMenuCheckboxItem
                 key={column.id}
-                className="capitalize"
                 checked={column.getIsVisible()}
                 onCheckedChange={(value) => column.toggleVisibility(!!value)}
               >
-                {column.id}
+                {p(
+                  (column.columnDef.meta as { label?: string } | undefined)?.label ??
+                    column.id,
+                )}
               </DropdownMenuCheckboxItem>
             )
           })}
