@@ -47,7 +47,8 @@ export function PaymentsMobileToolbar({ table }: { table: Table<Payment> }) {
   const paidFilter =
     (table.getColumn("paid")?.getFilterValue() as string[] | undefined) ?? []
   const tab = paidFilter.length === 1 ? paidFilter[0] : "all"
-  const countPaid = rows.filter((r) => r.original.paid).length
+  const scoped = table.getColumn("paid")?.getFacetedRowModel().rows ?? []
+  const countPaid = scoped.filter((r) => r.original.paid).length
 
   const collectors = useMemo(() => {
     const seen = new Map<string, string>()
@@ -96,8 +97,8 @@ export function PaymentsMobileToolbar({ table }: { table: Table<Payment> }) {
         }
         tabs={[
           { label: "Paid", value: "true", count: countPaid },
-          { label: "Unpaid", value: "false", count: rows.length - countPaid },
-          { label: "All", value: "all", count: rows.length },
+          { label: "Unpaid", value: "false", count: scoped.length - countPaid },
+          { label: "All", value: "all", count: scoped.length },
         ]}
       />
 

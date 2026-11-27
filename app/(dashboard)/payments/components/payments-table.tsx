@@ -6,6 +6,7 @@ import { useDataTable } from "@/components/data-table/use-data-table"
 import { Tx } from "@/components/tx"
 import { Badge } from "@/components/ui/badge"
 import { useGetPaymentList } from "@/hooks/rq/use-payment-query"
+import { useHydrated } from "@/hooks/use-hydrated"
 import { cn, generateAvatarUrl } from "@/lib/utils"
 import { usePaymentsStore } from "@/stores/payments-store"
 import type { Payment } from "@/types/payments"
@@ -19,19 +20,31 @@ import { ViewPaymentsDialog } from "./view-payments-dialog"
 
 export function PaymentsTable() {
   const { data: paymentsData, isLoading } = useGetPaymentList()
+  const hydrated = useHydrated()
   const { setIsViewPaymentDialogOpen, setSelectedPayment } = usePaymentsStore()
 
   const { table, render } = useDataTable({
     columns,
-    data: paymentsData?.results!,
-    loading: isLoading,
+    // the server has no payments, so neither may the first client render
+    data: hydrated ? paymentsData?.results! : undefined!,
+    loading: isLoading || !hydrated,
   })
 
   const shown = table.getFilteredRowModel().rows.map((r) => r.original)
   const paidRows = shown.filter((x) => x.paid)
   const sum = (list: Payment[]) => list.reduce((t, x) => t + (Number(x.amount) || 0), 0)
-  const billed = (list: Payment[]) =>
-    list.reduce((t, x) => t + (Number(x.bill_amount) || 0), 0)
+  // still owed: bill less what was waived and paid. Counted over every status, so it does not
+  // turn into zero on the "Paid" tab.
+  const scoped = (table.getColumn("paid")?.getFacetedRowModel().rows ?? []).map(
+    (r) => r.original,
+  )
+  const discount = scoped.reduce((t, x) => t + (Number(x.discount) || 0), 0)
+  const due = scoped
+    .filter((x) => !x.paid)
+    .reduce((t, x) => {
+      const left = Number(x.bill_amount) - Number(x.discount || 0) - Number(x.amount || 0)
+      return t + Math.max(0, left)
+    }, 0)
   const perDay = new Map<string, number>()
   for (const x of paidRows)
     perDay.set(dayKey(x), (perDay.get(dayKey(x)) ?? 0) + (Number(x.amount) || 0))
@@ -46,7 +59,7 @@ export function PaymentsTable() {
 
         <div className="block md:hidden">
           <DataTableCardView
-            loading={isLoading}
+            loading={isLoading || !hydrated}
             table={table}
             mapRow={(row) => {
               const p = row.original
@@ -97,6 +110,11 @@ export function PaymentsTable() {
                     >
                       {p.paid ? "Paid" : "Unpaid"}
                     </div>
+                    {Number(p.discount) > 0 && (
+                      <div className="text-amber-600 text-xs">
+                        −{Number(p.discount).toLocaleString("en-US")} <Tx>discount</Tx>
+                      </div>
+                    )}
                   </>
                 ),
               }
@@ -113,19 +131,15 @@ export function PaymentsTable() {
 
         <div className="hidden md:block">{render}</div>
 
-        {shown.length > 0 && (
+        {(shown.length > 0 || due > 0 || discount > 0) && (
           <div className="sticky bottom-20 z-10 mx-auto flex w-full max-w-3xl items-center justify-between gap-4 rounded-2xl border bg-card/90 px-4 py-2.5 shadow-lg backdrop-blur md:bottom-4">
             <Stat
               label={`${paidRows.length} paid`}
               value={sum(paidRows)}
               tone="emerald"
             />
-            <Stat label="Billed" value={billed(paidRows)} className="hidden sm:block" />
-            <Stat
-              label="Cash"
-              value={sum(paidRows.filter((x) => x.payment_method === "CASH"))}
-              align="right"
-            />
+            <Stat label="Discount" value={discount} tone="amber" />
+            <Stat label="Due" value={due} tone="red" align="right" />
           </div>
         )}
 
@@ -159,16 +173,14 @@ function Stat({
   value,
   tone,
   align,
-  className,
 }: {
   label: string
   value: number
-  tone?: "emerald"
+  tone?: "emerald" | "amber" | "red"
   align?: "right"
-  className?: string
 }) {
   return (
-    <div className={cn(align === "right" && "text-right", className)}>
+    <div className={cn(align === "right" && "text-right")}>
       <div className="text-muted-foreground text-[11px]">
         <Tx>{label}</Tx>
       </div>
@@ -176,6 +188,8 @@ function Stat({
         className={cn(
           "font-bold text-lg tabular-nums",
           tone === "emerald" && "text-emerald-600 dark:text-emerald-400",
+          tone === "amber" && "text-amber-600 dark:text-amber-400",
+          tone === "red" && "text-red-600 dark:text-red-400",
         )}
       >
         ৳{value.toLocaleString("en-US")}

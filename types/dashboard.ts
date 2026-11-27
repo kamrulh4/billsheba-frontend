@@ -1,6 +1,9 @@
 export type DashboardResponse = {
   total_customers: number
   active_customers: number
+  inactive_customers: number
+  new_customers_this_month: number
+  current_month_collection: string
   total_packages: number
   total_payments: number
   total_revenue: string

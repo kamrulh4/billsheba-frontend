@@ -12,18 +12,29 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
+import { cn } from "@/lib/utils"
 
 interface DataTableViewOptionsProps<TData> {
   table: Table<TData>
+  label?: string
+  className?: string
 }
 
-export function DataTableViewOptions<TData>({ table }: DataTableViewOptionsProps<TData>) {
+export function DataTableViewOptions<TData>({
+  table,
+  label = "View",
+  className,
+}: DataTableViewOptionsProps<TData>) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="ml-auto hidden h-8 lg:flex">
+        <Button
+          variant="outline"
+          size="sm"
+          className={cn("ml-auto hidden h-8 lg:flex", className)}
+        >
           <Settings2 />
-          View
+          {label}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-[150px]">

@@ -12,9 +12,9 @@ import { collectorName } from "../data/collector"
 import { paymentMethods } from "../data/data"
 import { PaymentsTableRowActions } from "./payments-table-row-actions"
 
-const money = (n: number) => `৳${n.toLocaleString("en-US")}`
-const sumOf = (rows: { original: Payment }[], key: "amount" | "bill_amount") =>
-  rows.reduce((t, r) => t + (Number(r.original[key]) || 0), 0)
+/** An unpaid bill nobody has taken money for yet: no collector, no method. */
+const untouched = (p: Payment) => !p.paid && !(Number(p.amount) > 0)
+const dash = <span className="text-muted-foreground">—</span>
 
 export const columns: ColumnDef<Payment>[] = [
   {
@@ -22,7 +22,6 @@ export const columns: ColumnDef<Payment>[] = [
     accessorFn: (row) =>
       `${row.customer.username} ${row.customer.name} ${row.customer.phone}`,
     header: ({ column }) => <DataTableColumnHeader column={column} title="Customer" />,
-    footer: () => <Tx>Total</Tx>,
     cell: ({ row }) => {
       return (
         <div className="flex space-x-2 items-center">
@@ -64,6 +63,7 @@ export const columns: ColumnDef<Payment>[] = [
       <DataTableColumnHeader column={column} title="Collected By" />
     ),
     cell: ({ row }) => {
+      if (untouched(row.original)) return dash
       const name = collectorName(row.original)
       const phone = row.original.entry_by?.phone
 
@@ -89,7 +89,6 @@ export const columns: ColumnDef<Payment>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Bill Amount (BDT)" />
     ),
-    footer: ({ table }) => money(sumOf(table.getFilteredRowModel().rows, "bill_amount")),
     cell: ({ row }) => {
       return (
         <div>
@@ -116,6 +115,8 @@ export const columns: ColumnDef<Payment>[] = [
         (method) => method.value === row.getValue("payment_method"),
       )
 
+      if (untouched(row.original)) return dash
+
       if (!status) {
         return null
       }
@@ -136,11 +137,6 @@ export const columns: ColumnDef<Payment>[] = [
     // accessorFn: (row) => `${row.entry_by?.first_name} ${row.entry_by?.last_name}`,
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Amount (BDT)" />
-    ),
-    footer: ({ table }) => (
-      <span className="text-emerald-600 dark:text-emerald-400">
-        {money(sumOf(table.getFilteredRowModel().rows, "amount"))}
-      </span>
     ),
     cell: ({ row }) => {
       return (

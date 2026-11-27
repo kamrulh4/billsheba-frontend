@@ -1,5 +1,5 @@
 import { Column } from "@tanstack/react-table"
-import { Check, PlusCircle } from "lucide-react"
+import { Check, ChevronDown, PlusCircle } from "lucide-react"
 import * as React from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -26,6 +26,8 @@ interface DataTableFacetedFilterProps<TData, TValue> {
     icon?: React.ComponentType<{ className?: string }>
   }[]
   defaultValues?: string[]
+  /** Solid "Title: value ▾" button instead of the dashed "+ Title" one. */
+  inline?: boolean
 }
 
 export function DataTableFacetedFilter<TData, TValue>({
@@ -33,6 +35,7 @@ export function DataTableFacetedFilter<TData, TValue>({
   title,
   options,
   defaultValues = [],
+  inline = false,
 }: DataTableFacetedFilterProps<TData, TValue>) {
   const { p, locale, num } = useT()
   const facets = column?.getFacetedUniqueValues()
@@ -59,41 +62,64 @@ export function DataTableFacetedFilter<TData, TValue>({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="h-8 border-dashed">
-          <PlusCircle />
-          {title ? p(title) : title}
-          {selectedValues.size > 0 && (
-            <>
-              <Separator orientation="vertical" className="mx-2 h-4" />
-              <Badge
-                variant="secondary"
-                className="rounded-sm px-1 font-normal lg:hidden"
-              >
-                {selectedValues.size}
-              </Badge>
-              <div className="hidden space-x-1 lg:flex">
-                {selectedValues.size > 2 ? (
-                  <Badge variant="secondary" className="rounded-sm px-1 font-normal">
-                    {num(selectedValues.size)}{" "}
-                    {locale === "bn" ? "টি নির্বাচিত" : "selected"}
-                  </Badge>
-                ) : (
-                  options
-                    .filter((option) => selectedValues.has(option.value))
-                    .map((option) => (
-                      <Badge
-                        variant="secondary"
-                        key={option.value}
-                        className="rounded-sm px-1 font-normal"
-                      >
-                        {p(option.label)}
-                      </Badge>
-                    ))
-                )}
-              </div>
-            </>
-          )}
-        </Button>
+        {inline ? (
+          <Button
+            variant="outline"
+            className={cn(
+              "h-9 font-normal",
+              selectedValues.size > 0 && "border-primary/40 bg-primary/5",
+            )}
+          >
+            <span className="text-muted-foreground">{title ? p(title) : title}:</span>
+            <span className="max-w-32 truncate font-medium">
+              {selectedValues.size === 0
+                ? p("All")
+                : selectedValues.size === 1
+                  ? p(
+                      options.find((o) => selectedValues.has(o.value))?.label ??
+                        "1 selected",
+                    )
+                  : `${num(selectedValues.size)} ${locale === "bn" ? "টি" : "selected"}`}
+            </span>
+            <ChevronDown className="text-muted-foreground" />
+          </Button>
+        ) : (
+          <Button variant="outline" size="sm" className="h-8 border-dashed">
+            <PlusCircle />
+            {title ? p(title) : title}
+            {selectedValues.size > 0 && (
+              <>
+                <Separator orientation="vertical" className="mx-2 h-4" />
+                <Badge
+                  variant="secondary"
+                  className="rounded-sm px-1 font-normal lg:hidden"
+                >
+                  {selectedValues.size}
+                </Badge>
+                <div className="hidden space-x-1 lg:flex">
+                  {selectedValues.size > 2 ? (
+                    <Badge variant="secondary" className="rounded-sm px-1 font-normal">
+                      {num(selectedValues.size)}{" "}
+                      {locale === "bn" ? "টি নির্বাচিত" : "selected"}
+                    </Badge>
+                  ) : (
+                    options
+                      .filter((option) => selectedValues.has(option.value))
+                      .map((option) => (
+                        <Badge
+                          variant="secondary"
+                          key={option.value}
+                          className="rounded-sm px-1 font-normal"
+                        >
+                          {p(option.label)}
+                        </Badge>
+                      ))
+                  )}
+                </div>
+              </>
+            )}
+          </Button>
+        )}
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0" align="start">
         <Command>
